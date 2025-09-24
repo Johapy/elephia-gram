@@ -103,10 +103,24 @@ function handleMethodTypeSelection(ctx) {
             ctx.reply('Por favor, selecciona una opción válida del teclado.');
             return;
     }
-    
-    ctx.session.paymentData = { method_type: methodType };
-    ctx.session.step = 'add_nickname';
-    ctx.reply(`Perfecto. Dale un apodo a este método (Ej: "Pago Móvil Personal"):`, cancelKeyboard);
+
+    const userId = ctx.from.id;
+    getPaymentMethodsForUser(userId).then(methods => {
+        const alreadyExists = methods.some(m => m.method_type === methodType);
+
+        if (alreadyExists) {
+            ctx.reply(`⚠️ Ya tienes registrado un método de tipo *${methodType}*. No puedes añadir otro.`, cancelKeyboard);
+            ctx.session.step = 'menu';
+            return;
+        }
+
+        ctx.session.paymentData = { method_type: methodType };
+        ctx.session.step = 'add_nickname';
+        ctx.reply(`Perfecto. Dale un apodo a este método (Ej: "Pago Móvil Personal"):`, cancelKeyboard);
+    }).catch(err => {
+        console.error('Error verificando métodos de pago:', err);
+        ctx.reply('❌ Ocurrió un error al verificar tus métodos de pago.');
+    });
 }
 
 function askForDetails(ctx) {
