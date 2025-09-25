@@ -1,6 +1,9 @@
 
 import { Markup } from 'telegraf';
 import { findUserById, getTransactionHistory, getAllUserIds } from '../db.js';
+import { getBTC } from '../services/dolar-service.js';
+
+const TAZA = await getBTC();
 
 // ID del administrador para comandos especiales
 const ADMIN_ID = parseInt(process.env.ADMIN_ID || '0');
@@ -25,6 +28,10 @@ const startCommand = async (ctx) => {
         ]).resize();
     }
     ctx.reply(welcomeMessage, keyboard);
+};
+
+const tazaCommand = async (ctx) => {
+    ctx.reply('¡Hola! nuestra taza es: ', TAZA);
 };
 
 // --- Manejador para /historial y su botón ---
@@ -90,6 +97,9 @@ export function registerCommands(bot) {
 
     bot.command('help', helpCommand);
     bot.hears('ℹ️ Ayuda', helpCommand);
+
+    bot.command('taza', tazaCommand);
+    bot.hears('ℹ️ taza', tazaCommand);
 
     bot.command('broadcast', broadcastCommand);
 }
