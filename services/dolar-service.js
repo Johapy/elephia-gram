@@ -9,3 +9,4 @@ export async function getBTC() {
 }
 
 console.log(await getBTC());
+console.log(typeof await getBTC());
