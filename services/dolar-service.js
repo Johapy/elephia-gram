@@ -8,4 +8,4 @@ export async function getBTC() {
   return value ? parseFloat(value) : "Dato no disponible";
 }
 
-console.log(typeof await getBTC());
+console.log(await getBTC());
