@@ -8,7 +8,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 
-const TASA_BOLIVAR = getBTC();
+const TASA_BOLIVAR = await getBTC();
 const COMISION_USD = 1;
 
 // Directorio para guardar temporalmente los comprobantes
