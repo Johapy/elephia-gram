@@ -3,11 +3,12 @@ import { Markup } from 'telegraf';
 import { createTransaction } from '../db.js';
 import { processPaymentImage } from '../services/image-service.js';
 import { mainKeyboard } from '../bot/keyboards.js' // <-- Importamos el servicio
+import { getBTC } from '../services/dolar-service.js';
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 
-const TASA_BOLIVAR = 225;
+const TASA_BOLIVAR = getBTC();
 const COMISION_USD = 1;
 
 // Directorio para guardar temporalmente los comprobantes
