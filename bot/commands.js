@@ -31,7 +31,7 @@ const startCommand = async (ctx) => {
 };
 
 const tazaCommand = async (ctx) => {
-    ctx.reply('¡Hola! nuestra taza es: ', TAZA);
+    ctx.reply(`¡Hola! nuestra taza es: ${TAZA}`);
 };
 
 // --- Manejador para /historial y su botón ---
