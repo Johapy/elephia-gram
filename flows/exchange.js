@@ -143,7 +143,6 @@ const exchangeFlow = {
 };
 
 function showConfirmation(ctx) {
-    const tasa = await getBTC();
     const amountToReceive = ctx.session.amount;
     const totalInUSD = amountToReceive + COMISION_USD;
     const totalInBolivares = totalInUSD * TASA_BOLIVAR;
