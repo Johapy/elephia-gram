@@ -110,14 +110,15 @@ const exchangeFlow = {
                     }
                     
                     // 3. Si tuvo éxito, guardar la transacción
+                    const tasa = await getBTC();
                     const transactionData = {
                         user_telegram_id: ctx.from.id,
                         transaction_type: ctx.session.action,
                         amount_usd: ctx.session.amount,
                         commission_usd: COMISION_USD,
                         total_usd: ctx.session.amount + COMISION_USD,
-                        rate_bs: TASA_BOLIVAR,
-                        total_bs: (ctx.session.amount + COMISION_USD) * TASA_BOLIVAR,
+                        rate_bs: tasa,
+                        total_bs: (ctx.session.amount + COMISION_USD) * tasa,
                         payment_reference: result.referenceId
                     };
 
