@@ -3,8 +3,6 @@ import { Markup } from 'telegraf';
 import { findUserById, getTransactionHistory, getAllUserIds } from '../db.js';
 import { getBTC } from '../services/dolar-service.js';
 
-const TAZA = await getBTC();
-
 // ID del administrador para comandos especiales
 const ADMIN_ID = parseInt(process.env.ADMIN_ID || '0');
 
@@ -31,7 +29,8 @@ const startCommand = async (ctx) => {
 };
 
 const tazaCommand = async (ctx) => {
-    ctx.reply(`¡Hola! nuestra taza es: ${TAZA}`);
+    const taza = await getBTC();
+    ctx.reply(`¡Hola! nuestra taza es: ${taza}`);
 };
 
 // --- Manejador para /historial y su botón ---
