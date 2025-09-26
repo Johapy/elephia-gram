@@ -155,7 +155,7 @@ function showConfirmation(ctx) {
         `💵 **Total a Pagar (USD): $${totalInUSD.toFixed(2)}**\n` +
         `🇻🇪 **Total a Pagar (Bs.): ${totalInBolivares.toFixed(2)}**\n` +
         `-------------------------------------\n\n` +
-        `¿Confirmas que los datos son correctos?`,
+        `¿Confirmas que los datos son correctos? taza: ${TASA_BOLIVAR} `,
         Markup.keyboard([
             ['👍 Sí, confirmar', '👎 No, cancelar']
         ]).resize()
