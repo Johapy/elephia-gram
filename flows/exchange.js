@@ -161,6 +161,18 @@ function showConfirmation(ctx) {
             ['👍 Sí, confirmar', '👎 No, cancelar']
         ]).resize()
     );
+
+    if (ctx.session.action === "Comprar"){
+        ctx.reply(
+            `🧾 **PagoMovil** 🧾\n\n` +
+            `Telefono: 0424-3354141\n\n` +
+            `Cedula: 29.846.137\n` +
+            `Banco: Banco Nacional de Credito (BNC 0191)\n` +
+            `-------------------------------------\n`
+        );
+        
+    }
+
 }
 
 export default exchangeFlow;
