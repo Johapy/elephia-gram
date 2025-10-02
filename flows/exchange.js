@@ -172,6 +172,15 @@ function showConfirmation(ctx) {
         );
         
     }
+    if (ctx.session.action === "Comprar"){
+        ctx.reply(
+            `-------------------------------------\n` +
+            `🧾 **Zinli** 🧾\n\n` +
+            `Correo: yohanderjose2002@gmail.com\n\n` +
+            `-------------------------------------\n`
+        );
+        
+    }
 
 }
 
