@@ -172,7 +172,7 @@ function showConfirmation(ctx) {
         );
         
     }
-    if (ctx.session.action === "Comprar"){
+    if (ctx.session.action === "Vender"){
         ctx.reply(
             `-------------------------------------\n` +
             `🧾 **Zinli** 🧾\n\n` +
