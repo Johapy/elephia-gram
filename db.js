@@ -76,6 +76,86 @@ export async function initializeDatabase() {
 }
 
 // ... (funciones de usuario y payment_methods sin cambios)
+export async function addUser(userData) {
+    const { telegram_id, username, first_name, last_name, email, phone } = userData;
+    const query = `
+        INSERT INTO users (telegram_id, username, first_name, last_name, email, phone)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+        username = VALUES(username), first_name = VALUES(first_name), last_name = VALUES(last_name), email = VALUES(email), phone = VALUES(phone);
+    `;
+    try {
+        await pool.query(query, [telegram_id, username, first_name, last_name, email, phone]);
+    } catch (error) {
+        console.error('Error adding/updating user:', error);
+    }
+}
+export async function findUserById(userId) {
+    const query = 'SELECT telegram_id FROM users WHERE telegram_id = ? LIMIT 1;';
+    try {
+        const [rows] = await pool.query(query, [userId]);
+        return rows.length > 0;
+    } catch (error) {
+        console.error('Error finding user by ID:', error);
+        return false;
+    }
+}
+export async function getAllUserIds() {
+    const query = 'SELECT telegram_id FROM users;';
+    try {
+        const [rows] = await pool.query(query);
+        return rows.map(row => row.telegram_id);
+    } catch (error) {
+        console.error('Error fetching user IDs:', error);
+        return [];
+    }
+}
+
+
+// --- FUNCIONES DE MÉTODOS DE PAGO MODIFICADAS ---
+export async function getPaymentMethodsForUser(userId) {
+    // Seleccionamos todas las columnas para poder mostrar los detalles correctos
+    const query = 'SELECT * FROM payment_methods WHERE user_telegram_id = ?;';
+    try {
+        const [rows] = await pool.query(query, [userId]);
+        return rows;
+    } catch (error) {
+        console.error('Error fetching payment methods:', error);
+        return [];
+    }
+}
+
+export async function addPaymentMethod(userId, data) {
+    const { method_type, nickname, account_details, pm_identity_card, pm_phone_number, pm_bank_name } = data;
+    const query = `
+        INSERT INTO payment_methods 
+        (user_telegram_id, method_type, nickname, account_details, pm_identity_card, pm_phone_number, pm_bank_name) 
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    `;
+    try {
+        await pool.query(query, [userId, method_type, nickname, account_details, pm_identity_card, pm_phone_number, pm_bank_name]);
+        console.log(`New payment method added for user ${userId}`);
+    } catch (error) {
+        console.error('Error adding payment method:', error);
+    }
+}
+
+export async function getTransactionHistory(userId) {
+    const query = `
+        SELECT transaction_type, total_usd, status, created_at 
+        FROM transactions 
+        WHERE user_telegram_id = ? 
+        ORDER BY created_at DESC 
+        LIMIT 10;
+    `;
+    try {
+        const [rows] = await pool.query(query, [userId]);
+        return rows;
+    } catch (error) {
+        console.error('Error fetching transaction history:', error);
+        return [];
+    }
+}
 
 // --- FUNCIÓN createTransaction MODIFICADA ---
 export async function createTransaction(transactionData) {
