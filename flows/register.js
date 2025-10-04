@@ -1,6 +1,7 @@
 
-import { Markup } from 'telegraf';
+import { Markup, session } from 'telegraf';
 import { addUser } from '../db.js';
+import { mainKeyboard } from '../bot/keyboards.js';
 
 const registerFlow = {
     start: (ctx) => {
@@ -38,7 +39,7 @@ const registerFlow = {
                 // Limpiamos la sesión
                 ctx.session = null;
                 
-                ctx.reply('✅ ¡Registro completado! 🎉 Gracias por unirte.');
+                ctx.reply('✅ ¡Registro completado! 🎉 Gracias por unirte.'), mainKeyboard;
                 break;
         }
     }
