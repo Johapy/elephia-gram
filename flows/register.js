@@ -38,6 +38,8 @@ const registerFlow = {
 
                 // Limpiamos la sesión
                 ctx.session = null;
+                ctx.session.step = null;
+                ctx.session.flow = null;
                 
                 ctx.reply('✅ ¡Registro completado! 🎉 Gracias por unirte.'), mainKeyboard;
                 break;
