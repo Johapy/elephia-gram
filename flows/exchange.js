@@ -118,7 +118,7 @@ const exchangeFlow = {
                         amount_usd: ctx.session.amount,
                         commission_usd: COMISION_USD,
                         total_usd: ctx.session.amount + COMISION_USD,
-                        rate_bs: tasa,
+                        rate_bs: ctx.session.tasa,
                         total_bs: (ctx.session.amount + COMISION_USD) * ctx.session.tasa,
                         payment_reference: result.referenceId
                     };
