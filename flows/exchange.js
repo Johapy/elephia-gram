@@ -19,9 +19,10 @@ if (!fs.existsSync(DOWNLOAD_DIR)) {
 
 
 const exchangeFlow = {
-    start: (ctx) => {
+    start: async (ctx) => {
         ctx.session.flow = 'exchange';
         ctx.session.step = 'action';
+        ctx.session.tasa = await getBTC();
         ctx.reply('🏦 ¡Bienvenido al módulo de cambio! ¿Qué operación deseas realizar hoy?', Markup.keyboard([
             ['📈 Comprar Zinli', '📉 Vender Zinli']
         ]).resize());
@@ -110,7 +111,7 @@ const exchangeFlow = {
                     }
                     
                     // 3. Si tuvo éxito, guardar la transacción
-                    const tasa = await getBTC();
+                    
                     const transactionData = {
                         user_telegram_id: ctx.from.id,
                         transaction_type: ctx.session.action,
@@ -118,7 +119,7 @@ const exchangeFlow = {
                         commission_usd: COMISION_USD,
                         total_usd: ctx.session.amount + COMISION_USD,
                         rate_bs: tasa,
-                        total_bs: (ctx.session.amount + COMISION_USD) * tasa,
+                        total_bs: (ctx.session.amount + COMISION_USD) * ctx.session.tasa,
                         payment_reference: result.referenceId
                     };
 
@@ -145,7 +146,7 @@ const exchangeFlow = {
 function showConfirmation(ctx) {
     const amountToReceive = ctx.session.amount;
     const totalInUSD = amountToReceive + COMISION_USD;
-    const totalInBolivares = totalInUSD * TASA_BOLIVAR;
+    const totalInBolivares = totalInUSD * ctx.session.tasa;
 
     ctx.reply(
         `🧾 **Resumen de tu Operación** 🧾\n\n` +
