@@ -19,15 +19,15 @@ if (!fs.existsSync(DOWNLOAD_DIR)) {
 
 
 const exchangeFlow = {
-    start: (ctx) => {
+    start: async (ctx) => {
         ctx.session.flow = 'exchange';
         ctx.session.step = 'action';
+        ctx.session.tasa = await getBTC();
         ctx.reply('🏦 ¡Bienvenido al módulo de cambio! ¿Qué operación deseas realizar hoy?', Markup.keyboard([
             ['📈 Comprar Zinli', '📉 Vender Zinli']
         ]).resize());
     },
     handle: async (ctx) => {
-        ctx.session.tasa = await getBTC();
         switch (ctx.session.step) {
             // ... (otros casos sin cambios)
              case 'action':
