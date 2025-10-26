@@ -18,13 +18,13 @@ if (!fs.existsSync(DOWNLOAD_DIR)) {
 }
 
 
-const exchangeFlow = {
+const paypalFlow = {
     start: async (ctx) => {
         ctx.session.flow = 'exchange';
         ctx.session.step = 'action';
         ctx.session.tasa = await getBTC();
         ctx.reply('🏦 ¡Bienvenido al módulo de cambio! ¿Qué operación deseas realizar hoy?', Markup.keyboard([
-            ['📈 Comprar Zinli', '📉 Vender Zinli']
+            ['📈 Comprar PayPal', '📉 Vender PayPal']
         ]).resize());
     },
     handle: async (ctx) => {
@@ -33,7 +33,7 @@ const exchangeFlow = {
              case 'action':
                 ctx.session.action = ctx.message.text.includes('Comprar') ? 'Comprar' : 'Vender';
                 ctx.session.step = 'select_amount';
-                ctx.reply(`Perfecto. ¿Qué cantidad de saldo Zinli deseas ${ctx.session.action.toLowerCase()}?`, Markup.keyboard([
+                ctx.reply(`Perfecto. ¿Qué cantidad de saldo PayPal deseas ${ctx.session.action.toLowerCase()}?`, Markup.keyboard([
                     ['$1', '$5', '$10'],
                     ['$20', '$50', '$100'],
                     ['Otro monto']
@@ -150,7 +150,7 @@ function showConfirmation(ctx) {
 
     ctx.reply(
         `🧾 Resumen de tu Operación 🧾\n\n` +
-        `Acción: ${ctx.session.action} Zinli\n\n` +
+        `Acción: ${ctx.session.action} PayPal\n\n` +
         `💰 Monto a recibir: **$${amountToReceive.toFixed(2)} USD**\n` +
         `➕ Comisión del servicio: **$${COMISION_USD.toFixed(2)} USD**\n\n` +
         `-------------------------------------\n` +
@@ -176,7 +176,7 @@ function showConfirmation(ctx) {
     if (ctx.session.action === "Vender"){
         ctx.reply(
             `-------------------------------------\n` +
-            `🧾 **Zinli** 🧾\n\n` +
+            `🧾 **PayPal** 🧾\n\n` +
             `Correo: yohanderjose2002@gmail.com\n\n` +
             `-------------------------------------\n`
         );
@@ -185,5 +185,5 @@ function showConfirmation(ctx) {
 
 }
 
-export default exchangeFlow;
+export default paypalFlow;
 
