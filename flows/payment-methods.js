@@ -116,7 +116,7 @@ function handleMethodTypeSelection(ctx) {
 
         ctx.session.paymentData = { method_type: methodType };
         ctx.session.step = 'add_nickname';
-        ctx.reply(`Perfecto. Dale un apodo a este método (Ej: "Pago Móvil Personal"):`, cancelKeyboard);
+        ctx.reply(`Perfecto. Dale un apodo a este método (Ej: "Zinli Pago"):`, cancelKeyboard);
     }).catch(err => {
         console.error('Error verificando métodos de pago:', err);
         ctx.reply('❌ Ocurrió un error al verificar tus métodos de pago.');

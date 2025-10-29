@@ -29,7 +29,7 @@ bot.hears('👤 Registrarme', async (ctx) => {
 
 bot.hears('💹 Realizar Cambio', async (ctx) => {
     if (!(await findUserById(ctx.from.id))) {
-        return ctx.reply('Debes registrarte primero para poder realizar un cambio.');
+        return ctx.reply('Debes registrarte para poder ver tu historial, escribe /start para iniciar tu registro!');
     }
     exchangeFlow.start(ctx);
 });
@@ -37,7 +37,7 @@ bot.hears('💹 Realizar Cambio', async (ctx) => {
 // --- 2. NUEVO 'hears' PARA EL FLUJO DE MÉTODOS DE PAGO ---
 bot.hears('💳 Mis Métodos de Pago', async (ctx) => {
     if (!(await findUserById(ctx.from.id))) {
-        return ctx.reply('Debes registrarte primero para gestionar tus métodos de pago.');
+        return ctx.reply('Debes registrarte para poder ver tu historial, escribe /start para iniciar tu registro!');
     }
     paymentMethodsFlow.start(ctx);
 });

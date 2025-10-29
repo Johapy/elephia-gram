@@ -37,7 +37,7 @@ const tazaCommand = async (ctx) => {
 const historyCommand = async (ctx) => {
     const userId = ctx.from.id;
     if (!(await findUserById(userId))) {
-        return ctx.reply('Debes registrarte para poder ver tu historial.');
+        return ctx.reply('Debes registrarte para poder ver tu historial, escribe /start para iniciar tu registro!');
     }
     const history = await getTransactionHistory(userId);
     if (history.length === 0) {
