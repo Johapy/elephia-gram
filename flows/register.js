@@ -23,8 +23,8 @@ const registerFlow = {
                 break;
             case 'phone':
                 const phoneInput = ctx.message.text;
-                if (/^(0412|0414|0424)\d{7}$/.test(phoneInput)){
-                    ctx.reply('Por favor, ingresa un número de teléfono válido.');
+                if (!/^(0412|0414|0424)\d{7}$/.test(phoneInput)) {
+                    ctx.reply('❌ Por favor, ingresa un número de teléfono válido (por ejemplo: 04141234567).');
                     return;
                 }
                 ctx.session.phone = ctx.message.text;
