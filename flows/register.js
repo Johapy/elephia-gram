@@ -22,7 +22,8 @@ const registerFlow = {
                 ctx.reply('📱 ¡Ya casi terminamos! Ingresa tu número de teléfono.');
                 break;
             case 'phone':
-                if (/^(0412|0414|0424)\d{7}$/.test(ctx.message.text)){
+                const phoneInput = ctx.message.text;
+                if (/^(0412|0414|0424)\d{7}$/.test(phoneInput)){
                     ctx.reply('Por favor, ingresa un número de teléfono válido.');
                     return;
                 }
