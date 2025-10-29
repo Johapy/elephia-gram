@@ -17,6 +17,12 @@ const registerFlow = {
                 ctx.reply('📧 ¡Excelente! Ahora, ingresa tu correo electrónico.');
                 break;
             case 'email':
+                //Expresion regular para validar que el correo sea valido
+                const emailInput = ctx.message.text;
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
+                    ctx.reply('❌ Por favor, ingresa un correo electrónico válido (ej: usuario@correo.com).');
+                    return;
+                }
                 ctx.session.email = ctx.message.text;
                 ctx.session.step = 'phone';
                 ctx.reply('📱 ¡Ya casi terminamos! Ingresa tu número de teléfono.');
