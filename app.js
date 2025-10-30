@@ -48,12 +48,17 @@ bot.on('text', (ctx) => {
     const text = ctx.message.text;
     if (text === 'hola') {
         ctx.reply(
-            `🌟 **Bienvenido a Elephia Exchange** 🌟\n\n` +
+            `🌟 **Bienvenido a Mueve Exchange** 🌟\n\n` +
             `¡Hola! Soy tu asistente para operaciones de cambio de divisas.\n\n` +
             `📝 **Cómo usar el bot:**\n` +
             `• Escribe **'exchange'** para iniciar una operación de cambio de bolívares\n` +
             `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
             `• Escribe **'help'** para obtener ayuda adicional\n\n` +
+            `` +
+            `Siguenos:` +
+            `- ❇️ Facebook: @MueveCA` +
+            `- ❇️ Instagram: @Mueve.app` +
+            `- 📞 Whatsapp (Soporte): 0412-1283027` +
             `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
         );
         return;
