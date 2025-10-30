@@ -74,7 +74,7 @@ const exchangeFlow = {
                 }else {
                     ctx.session.flow = null;
                     ctx.session.step = null;
-                    ctx.reply('❌ Operación cancelada. Si cambias de opinión, aquí estaré para ayudarte.');
+                    ctx.reply('❌ Operación cancelada. Si cambias de opinión, aquí estaré para ayudarte.', mainKeyboard);
                 }
                 break;
 
