@@ -55,10 +55,10 @@ bot.on('text', (ctx) => {
             `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
             `• Escribe **'help'** para obtener ayuda adicional\n\n` +
             `` +
-            `Siguenos:` +
-            `- ❇️ Facebook: @MueveCA` +
-            `- ❇️ Instagram: @Mueve.app` +
-            `- 📞 Whatsapp (Soporte): 0412-1283027` +
+            `Siguenos:\n` +
+            `- ❇️ Facebook: @MueveCA\n` +
+            `- ❇️ Instagram: @Mueve.app\n` +
+            `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
             `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
         );
         return;
@@ -81,10 +81,10 @@ bot.on('text', (ctx) => {
                 `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
                 `• Escribe **'help'** para obtener ayuda adicional\n\n` +
                 `` +
-                `Siguenos:` +
-                `- ❇️ Facebook: @MueveCA` +
-                `- ❇️ Instagram: @Mueve.app` +
-                `- 📞 Whatsapp (Soporte): 0412-1283027` +
+                `Siguenos:\n` +
+                `- ❇️ Facebook: @MueveCA\n` +
+                `- ❇️ Instagram: @Mueve.app\n` +
+                `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
                 `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
             );
         }
