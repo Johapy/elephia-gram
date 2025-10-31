@@ -127,4 +127,5 @@ export function registerCommands(bot) {
     bot.hears('ℹ️ taza', tazaCommand);
 
     bot.command('broadcast', broadcastCommand);
+    bot.command('msg', msgCommand);
 }
