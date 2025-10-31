@@ -83,6 +83,32 @@ const broadcastCommand = async (ctx) => {
     ctx.reply(`✅ Envío completado.\n\nExitosos: ${successCount}\nErrores: ${errorCount}`);
 };
 
+const msgCommand = async (ctx) => {
+    const args = ctx.message.text.split(' ');
+  
+    if (args.length < 3) {
+      return ctx.reply('Uso: /msg <id_usuario> <mensaje>');
+    }
+  
+    const id = args[1];
+    const mensaje = args.slice(2).join(' ');
+  
+    try {
+      // Opcional: puedes verificar si el ID existe en tu base de datos
+      const [rows] = await findUserById(id);
+  
+      if (rows.length === 0) {
+        return ctx.reply('⚠️ No se encontró ningún usuario con ese ID.');
+      }
+  
+      await bot.telegram.sendMessage(id, mensaje);
+      ctx.reply(`✅ Mensaje enviado al usuario ${id}.`);
+    } catch (err) {
+      console.error(err);
+      ctx.reply('❌ Error al enviar el mensaje.');
+    }
+  };
+
 // --- Manejador para /help y su botón ---
 const helpCommand = (ctx) => ctx.reply('Usa los botones del menú para interactuar conmigo y realizar tus operaciones.');
 
