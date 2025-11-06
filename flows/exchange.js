@@ -30,7 +30,7 @@ const exchangeFlow = {
     handle: async (ctx) => {
         switch (ctx.session.step) {
             // ... (otros casos sin cambios)
-             case 'action':
+            case 'action':
                 ctx.session.action = ctx.message.text.includes('Comprar') ? 'Comprar' : 'Vender';
                 ctx.session.step = 'select_amount';
                 ctx.reply(`Perfecto. ¿Qué cantidad de saldo Zinli deseas ${ctx.session.action.toLowerCase()}?`, Markup.keyboard([
@@ -71,7 +71,7 @@ const exchangeFlow = {
                 if (ctx.message.text.includes('Sí')) {
                     ctx.session.step = 'payment';
                     ctx.reply('💸 ¡Genial! Para continuar, por favor, realiza el pago y envíame una captura de pantalla del comprobante.');
-                }else {
+                } else {
                     ctx.session.flow = null;
                     ctx.session.step = null;
                     ctx.reply('❌ Operación cancelada. Si cambias de opinión, aquí estaré para ayudarte.', mainKeyboard);
@@ -84,7 +84,7 @@ const exchangeFlow = {
                     return;
                 }
                 ctx.reply('🤖 Analizando tu comprobante... Esto puede tardar unos segundos.');
-                
+
                 let imagePath = '';
 
                 try {
@@ -92,11 +92,11 @@ const exchangeFlow = {
                     const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
                     const url = await ctx.telegram.getFileLink(fileId);
                     const response = await axios({ url: url.href, responseType: 'stream' });
-                    
+
                     imagePath = path.join(DOWNLOAD_DIR, `${fileId}.jpg`);
                     const writer = fs.createWriteStream(imagePath);
                     response.data.pipe(writer);
-                    
+
                     await new Promise((resolve, reject) => {
                         writer.on('finish', resolve);
                         writer.on('error', reject);
@@ -106,14 +106,19 @@ const exchangeFlow = {
                     const result = await processPaymentImage(imagePath);
 
                     if (!result.success) {
-                        ctx.reply(`❌ Error al leer el comprobante: ${result.error} Por favor, inténtalo de nuevo o contacta a soporte.`);
+                        ctx.session.step = 'manual_reference';
+                        ctx.reply(
+                            `⚠️ No pude detectar automáticamente el número de referencia del comprobante.\n\n` +
+                            `Por favor, escribe **solo el número de referencia** tal como aparece en tu comprobante.\n\n` +
+                            `Ejemplo: 1234567890`
+                        );
                         return;
                     }
-                    
+
                     // 3. Si tuvo éxito, guardar la transacción
 
                     const commission = calcularComision(ctx.session.amount);
-                    
+
                     const transactionData = {
                         user_telegram_id: ctx.from.id,
                         transaction_type: ctx.session.action,
@@ -141,6 +146,37 @@ const exchangeFlow = {
                     ctx.session.step = null;
                 }
                 break;
+
+            case 'manual_reference':
+                const ref = ctx.message.text.trim();
+
+                if (!/^\d+$/.test(ref)) {
+                    ctx.reply('❌ La referencia debe contener **solo números**. Inténtalo nuevamente.');
+                    return;
+                }
+
+                // Guardamos transacción
+                const commissionManual = calcularComision(ctx.session.amount);
+
+                const transactionDataManual = {
+                    user_telegram_id: ctx.from.id,
+                    transaction_type: ctx.session.action,
+                    amount_usd: ctx.session.amount,
+                    commission_usd: commissionManual,
+                    total_usd: ctx.session.amount + commissionManual,
+                    rate_bs: ctx.session.tasa,
+                    total_bs: (ctx.session.amount + commissionManual) * ctx.session.tasa,
+                    payment_reference: ref
+                };
+
+                await createTransaction(transactionDataManual);
+
+                ctx.reply(`✅ Pago recibido.\nTu orden ha sido creada con la referencia **#${ref}** y está en estado *pendiente*.\n\nTe notificaremos pronto.`, mainKeyboard);
+
+                // Limpiamos sesión
+                ctx.session.flow = null;
+                ctx.session.step = null;
+                break;
         }
     }
 };
@@ -166,7 +202,7 @@ function showConfirmation(ctx) {
         ]).resize()
     );
 
-    if (ctx.session.action === "Comprar"){
+    if (ctx.session.action === "Comprar") {
         ctx.reply(
             `🧾 **PagoMovil** 🧾\n\n` +
             `Telefono: 0424-3354141\n\n` +
@@ -174,16 +210,16 @@ function showConfirmation(ctx) {
             `Banco: Banco Nacional de Credito (BNC 0191)\n` +
             `-------------------------------------\n`
         );
-        
+
     }
-    if (ctx.session.action === "Vender"){
+    if (ctx.session.action === "Vender") {
         ctx.reply(
             `-------------------------------------\n` +
             `🧾 **Zinli** 🧾\n\n` +
             `Correo: yohanderjose2002@gmail.com\n\n` +
             `-------------------------------------\n`
         );
-        
+
     }
 
 }
