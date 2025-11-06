@@ -1,4 +1,3 @@
-
 import { createWorker } from 'tesseract.js';
 import path from 'path';
 
@@ -17,23 +16,31 @@ async function processPaymentImage(imagePath) {
         const { data: { text } } = await worker.recognize(imagePath);
         console.log(`[ImageService] Texto extraído:\n---\n${text}\n---`);
 
-        // Expresión regular combinada para múltiples formatos de banco.
-        // Busca "referencia" U "operacion" y captura el número siguiente.
-        const combinedRegex = /(?:(?:n[uú]mero\sde\s)?referencia|operaci[oó]n):?\s*(\d{6,20})/i;
-        
-        const match = text.match(combinedRegex);
+        // Limpiamos el texto para evitar problemas con múltiples espacios o saltos
+        const cleanedText = text.replace(/\s+/g, ' ').toLowerCase();
+        console.log(`[ImageService] Texto normalizado:\n${cleanedText}\n---`);
 
-        if (match && match[1]) {
-            const referenceId = match[1];
-            console.log(`[ImageService] ¡Éxito! Número de referencia encontrado: ${referenceId}`);
+        /**
+         * Expresión regular mejorada:
+         * - Detecta: referencia, nro, nro., número de referencia, operación
+         * - Tolera espacios, puntos o guiones
+         * - Captura números de 6 a 20 dígitos
+         */
+        const combinedRegex = /(n(?:ú|u)mero\s*de\s*referencia|nro\.?|referencia|operaci[oó]n)\s*[:\-]?\s*([0-9]{6,20})/i;
+
+        const match = cleanedText.match(combinedRegex);
+
+        if (match && match[2]) {
+            const referenceId = match[2].trim();
+            console.log(`[ImageService] ✅ Número de referencia encontrado: ${referenceId}`);
             return { success: true, referenceId: referenceId, error: null };
         } else {
-            console.log('[ImageService] Error: No se pudo encontrar un número de referencia válido.');
+            console.log('[ImageService] ❌ No se encontró un número de referencia válido.');
             return { success: false, referenceId: null, error: 'No se pudo encontrar un número de referencia en el comprobante.' };
         }
 
     } catch (error) {
-        console.error('[ImageService] Error procesando la imagen con Tesseract:', error);
+        console.error('[ImageService] ❌ Error procesando la imagen con Tesseract:', error);
         return { success: false, referenceId: null, error: 'Hubo un error técnico al leer la imagen.' };
     } finally {
         await worker.terminate();
