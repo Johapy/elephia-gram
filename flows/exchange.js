@@ -136,7 +136,13 @@ const exchangeFlow = {
 
                 } catch (error) {
                     console.error("Error en el procesamiento del pago:", error);
-                    ctx.reply("❌ Hubo un error técnico procesando tu comprobante. Por favor, contacta a soporte.");
+                    ctx.session.step = 'manual_reference';
+                    ctx.reply(
+                        `⚠️ Hubo un problema al procesar el comprobante.\n` +
+                        `Pero no te preocupes, aún podemos continuar.\n\n` +
+                        `Por favor, escribe **solo el número de referencia** del pago.\n\n` +
+                        `Ejemplo: 1234567890`
+                    );
                 } finally {
                     // 4. Limpiar la sesión y el archivo temporal
                     if (fs.existsSync(imagePath)) {
