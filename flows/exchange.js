@@ -111,15 +111,17 @@ const exchangeFlow = {
                     }
                     
                     // 3. Si tuvo éxito, guardar la transacción
+
+                    const commission = calcularComision(ctx.session.amount);
                     
                     const transactionData = {
                         user_telegram_id: ctx.from.id,
                         transaction_type: ctx.session.action,
                         amount_usd: ctx.session.amount,
-                        commission_usd: COMISION_USD,
-                        total_usd: ctx.session.amount + COMISION_USD,
+                        commission_usd: commission,
+                        total_usd: ctx.session.amount + commission,
                         rate_bs: ctx.session.tasa,
-                        total_bs: (ctx.session.amount + COMISION_USD) * ctx.session.tasa,
+                        total_bs: (ctx.session.amount + commission) * ctx.session.tasa,
                         payment_reference: result.referenceId
                     };
 
@@ -145,14 +147,15 @@ const exchangeFlow = {
 
 function showConfirmation(ctx) {
     const amountToReceive = ctx.session.amount;
-    const totalInUSD = amountToReceive + COMISION_USD;
+    const commission = calcularComision(amountToReceive);
+    const totalInUSD = amountToReceive + commission;
     const totalInBolivares = totalInUSD * ctx.session.tasa;
 
     ctx.reply(
         `🧾 Resumen de tu Operación 🧾\n\n` +
         `Acción: ${ctx.session.action} Zinli\n\n` +
         `💰 Monto a recibir: **$${amountToReceive.toFixed(2)} USD**\n` +
-        `➕ Comisión del servicio: **$${COMISION_USD.toFixed(2)} USD**\n\n` +
+        `➕ Comisión del servicio: **$${commission.toFixed(2)} USD**\n\n` +
         `-------------------------------------\n` +
         `💵 **Total a Pagar (USD): $${totalInUSD.toFixed(2)}**\n` +
         `🇻🇪 **Total a Pagar (Bs.): ${totalInBolivares.toFixed(2)}**\n` +
@@ -184,6 +187,21 @@ function showConfirmation(ctx) {
     }
 
 }
+
+function calcularComision(amount) {
+    switch (true) {
+        case (amount < 10):
+            return 1; // Comisión fija de $1
+
+        case (amount <= 25):
+            return 1.5; // Comisión fija de $1.50
+
+        default:
+            return amount * 0.08; // Comisión del 8%
+    }
+}
+
+
 
 export default exchangeFlow;
 
