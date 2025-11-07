@@ -144,12 +144,15 @@ const exchangeFlow = {
                         `Ejemplo: 1234567890`
                     );
                 } finally {
-                    // 4. Limpiar la sesión y el archivo temporal
                     if (fs.existsSync(imagePath)) {
                         fs.unlinkSync(imagePath);
                     }
-                    ctx.session.flow = null;
-                    ctx.session.step = null;
+                
+                    // ❌ SOLO limpiamos si NO vamos a pedir referencia manual
+                    if (ctx.session.step !== 'manual_reference') {
+                        ctx.session.flow = null;
+                        ctx.session.step = null;
+                    }
                 }
                 break;
 
