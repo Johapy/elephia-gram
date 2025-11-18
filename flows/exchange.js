@@ -123,16 +123,21 @@ const exchangeFlow = {
 
                     // 3. Si tuvo éxito, guardar la transacción
 
-                    const commission = calcularComision(ctx.session.amount);
+                    const commission = calcularComision(ctx.session.amount, ctx.session.action);
+
+                    // Si es vender, se resta la comisión
+                    const totalUSD = ctx.session.action === "Vender"
+                        ? ctx.session.amount - commission
+                        : ctx.session.amount + commission;
 
                     const transactionData = {
                         user_telegram_id: ctx.from.id,
                         transaction_type: ctx.session.action,
                         amount_usd: ctx.session.amount,
                         commission_usd: commission,
-                        total_usd: ctx.session.amount + commission,
+                        total_usd: totalUSD,
                         rate_bs: ctx.session.tasa,
-                        total_bs: (ctx.session.amount + commission) * ctx.session.tasa,
+                        total_bs: totalUSD * ctx.session.tasa,
                         payment_reference: result.referenceId
                     };
 
@@ -171,16 +176,20 @@ const exchangeFlow = {
                 }
 
                 // Guardamos transacción
-                const commissionManual = calcularComision(ctx.session.amount);
+                const commissionManual = calcularComision(ctx.session.amount, ctx.session.action);
+
+                const totalUSDManual = ctx.session.action === "Vender"
+                    ? ctx.session.amount - commissionManual
+                    : ctx.session.amount + commissionManual;
 
                 const transactionDataManual = {
                     user_telegram_id: ctx.from.id,
                     transaction_type: ctx.session.action,
                     amount_usd: ctx.session.amount,
                     commission_usd: commissionManual,
-                    total_usd: ctx.session.amount + commissionManual,
+                    total_usd: totalUSDManual,
                     rate_bs: ctx.session.tasa,
-                    total_bs: (ctx.session.amount + commissionManual) * ctx.session.tasa,
+                    total_bs: totalUSDManual * ctx.session.tasa,
                     payment_reference: ref
                 };
 
@@ -197,21 +206,26 @@ const exchangeFlow = {
 };
 
 function showConfirmation(ctx) {
-    const amountToReceive = ctx.session.amount;
-    const commission = calcularComision(amountToReceive);
-    const totalInUSD = amountToReceive + commission;
+    const amount = ctx.session.amount;
+    const commission = calcularComision(amount, ctx.session.action);
+
+    // 🟢 Si vende: se resta la comisión
+    const totalInUSD = ctx.session.action === "Vender"
+        ? amount - commission
+        : amount + commission;
+
     const totalInBolivares = totalInUSD * ctx.session.tasa;
 
     ctx.reply(
         `🧾 Resumen de tu Operación 🧾\n\n` +
         `Acción: ${ctx.session.action} Zinli\n\n` +
-        `💰 Monto a recibir: **$${amountToReceive.toFixed(2)} USD**\n` +
-        `➕ Comisión del servicio: **$${commission.toFixed(2)} USD**\n\n` +
+        `💰 Monto: **$${amount.toFixed(2)} USD**\n` +
+        `➖ Comisión: **$${commission.toFixed(2)} USD**\n\n` +
         `-------------------------------------\n` +
-        `💵 **Total a Pagar (USD): $${totalInUSD.toFixed(2)}**\n` +
-        `🇻🇪 **Total a Pagar (Bs.): ${totalInBolivares.toFixed(2)}**\n` +
+        `💵 **Total ${ctx.session.action === "Vender" ? 'a Recibir' : 'a Pagar'} (USD): $${totalInUSD.toFixed(2)}**\n` +
+        `🇻🇪 **Total en Bs.: ${totalInBolivares.toFixed(2)}**\n` +
         `-------------------------------------\n\n` +
-        `¿Confirmas que los datos son correctos? taza: ${TASA_BOLIVAR} `,
+        `¿Confirmas que los datos son correctos?`,
         Markup.keyboard([
             ['👍 Sí, confirmar', '👎 No, cancelar']
         ]).resize()
@@ -222,33 +236,33 @@ function showConfirmation(ctx) {
             `🧾 **PagoMovil** 🧾\n\n` +
             `Telefono: 0424-3354141\n\n` +
             `Cedula: 29.846.137\n` +
-            `Banco: Banco Nacional de Credito (BNC 0191)\n` +
-            `-------------------------------------\n`
+            `Banco: Banco Nacional de Credito (BNC 0191)\n`
         );
-
     }
+
     if (ctx.session.action === "Vender") {
         ctx.reply(
             `-------------------------------------\n` +
             `🧾 **Zinli** 🧾\n\n` +
-            `Correo: yohanderjose2002@gmail.com\n\n` +
-            `-------------------------------------\n`
+            `Correo: yohanderjose2002@gmail.com\n\n`
         );
-
     }
-
 }
 
-function calcularComision(amount) {
+
+function calcularComision(amount, action) {
+
+    // 🟢 Si el usuario VENDE → cobra $1 fijo
+    if (action === "Vender") return 1;
+
+    // 🔵 Si compra → aplicar comisiones normales
     switch (true) {
         case (amount < 10):
-            return 1; // Comisión fija de $1
-
+            return 1;
         case (amount <= 25):
-            return 1.5; // Comisión fija de $1.50
-
+            return 1.5;
         default:
-            return amount * 0.08; // Comisión del 8%
+            return amount * 0.08;
     }
 }
 
