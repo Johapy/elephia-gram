@@ -5,40 +5,74 @@ import { mainKeyboard, unegisteredKeyboard } from './keyboards.js';
 
 const ADMIN_ID = parseInt(process.env.ADMIN_ID || '0');
 
-// --- FUNCIÓN DE BROADCAST MEJORADA ---
-// Ahora acepta un photoId opcional. Si se le pasa, envía una foto con caption.
-// Si no, envía solo texto.
+// ... (función broadcastMessage sin cambios)
 export async function broadcastMessage(ctx, text, photoId = null) {
     const userIds = await getAllUserIds();
     let successCount = 0;
     let errorCount = 0;
-
-    // Usamos un bucle for...of para poder usar await dentro y no saturar la API
     for (const id of userIds) {
         try {
             if (photoId) {
-                // Si hay photoId, usamos el método sendPhoto
                 await ctx.telegram.sendPhoto(id, photoId, { caption: text, parse_mode: 'Markdown' });
             } else {
-                // Si no, usamos el método de siempre
                 await ctx.telegram.sendMessage(id, text, { parse_mode: 'Markdown' });
             }
             successCount++;
         } catch (error) {
-            // Este error suele ocurrir si un usuario bloqueó al bot.
             console.error(`Error enviando mensaje a ${id}:`, error.description);
             errorCount++;
         }
-        // Pequeña pausa para evitar ser marcado como spam por Telegram
-        await new Promise(resolve => setTimeout(resolve, 100)); 
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
-    
-    // Devolvemos el resultado para que el comando original pueda notificar al admin
     return { successCount, errorCount };
 }
 
+// --- COMANDO /broadcast MODIFICADO ---
+const textBroadcastCommand = async (ctx) => {
+    if (ctx.from.id !== ADMIN_ID) {
+        return ctx.reply('❌ No tienes permiso para usar este comando.');
+    }
+    const message = ctx.message.text.slice('/broadcast'.length).trim();
+    if (!message) {
+        return ctx.reply('Por favor, escribe el mensaje a enviar. Si quieres adjuntar una imagen, envíala después de este comando.');
+    }
+    
+    // Guardamos el texto en la sesión del admin
+    ctx.session.broadcast_text = message;
 
-// --- Comandos ---
+    // Le pedimos al admin el siguiente paso
+    ctx.reply(
+        `✅ Tu mensaje de broadcast ha sido guardado.\n\n` +
+        `Ahora, por favor, envíame la imagen que quieres adjuntar.\n\n` +
+        `Si quieres enviarlo sin imagen, usa el comando /sendbroadcast.\n` +
+        `Para cancelar, usa /cancelbroadcast.`
+    );
+};
+
+// --- NUEVO COMANDO /sendbroadcast ---
+// Para enviar el mensaje de texto que ya está en la sesión
+const sendBroadcastCommand = async (ctx) => {
+    if (ctx.from.id !== ADMIN_ID || !ctx.session.broadcast_text) {
+        return; // No hace nada si no es admin o no hay mensaje guardado
+    }
+    
+    ctx.reply('🚀 Iniciando el envío masivo de solo texto...');
+    const { successCount, errorCount } = await broadcastMessage(ctx, ctx.session.broadcast_text);
+    ctx.session.broadcast_text = null; // Limpiamos la sesión
+    ctx.reply(`✅ Envío completado.\n\nExitosos: ${successCount}\nErrores: ${errorCount}`);
+};
+
+// --- NUEVO COMANDO /cancelbroadcast ---
+const cancelBroadcastCommand = (ctx) => {
+    if (ctx.from.id !== ADMIN_ID) {
+        return;
+    }
+    ctx.session.broadcast_text = null; // Limpiamos la sesión
+    ctx.reply('✅ El envío del broadcast ha sido cancelado.');
+};
+
+
+// ... (resto de comandos sin cambios)
 const startCommand = async (ctx) => {
     const isRegistered = await findUserById(ctx.from.id);
     if (isRegistered) {
@@ -47,36 +81,17 @@ const startCommand = async (ctx) => {
         ctx.reply('¡Hola! 👋 Soy tu asistente de exchange. Para comenzar, por favor, regístrate.', unegisteredKeyboard);
     }
 };
-
-const historyCommand = async (ctx) => {
-    // ... (lógica del historial sin cambios)
-};
-
+const historyCommand = async (ctx) => { /* ... */ };
 const helpCommand = (ctx) => ctx.reply('Usa los botones del menú para interactuar.');
 
-// Este es el comando para broadcast de SOLO TEXTO
-const textBroadcastCommand = async (ctx) => {
-    if (ctx.from.id !== ADMIN_ID) {
-        return ctx.reply('❌ No tienes permiso para usar este comando.');
-    }
-    const message = ctx.message.text.slice('/broadcast'.length).trim();
-    if (!message) {
-        return ctx.reply('Por favor, escribe el mensaje. Ejemplo: `/broadcast ¡Hola a todos!`');
-    }
-    
-    ctx.reply('🚀 Iniciando el envío masivo de texto...');
-    const { successCount, errorCount } = await broadcastMessage(ctx, message); // No pasamos photoId
-    ctx.reply(`✅ Envío completado.\n\nExitosos: ${successCount}\nErrores: ${errorCount}`);
-};
-
 export function registerCommands(bot) {
+    bot.command('broadcast', textBroadcastCommand);
+    bot.command('sendbroadcast', sendBroadcastCommand);
+    bot.command('cancelbroadcast', cancelBroadcastCommand);
+
     bot.start(startCommand);
-    
     bot.command('historial', historyCommand);
     bot.hears('📜 Mi Historial', historyCommand);
-
     bot.command('help', helpCommand);
     bot.hears('ℹ️ Ayuda', helpCommand);
-
-    bot.command('broadcast', textBroadcastCommand); // El /broadcast de texto sigue funcionando
 }
