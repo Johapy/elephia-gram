@@ -23,6 +23,7 @@ const exchangeFlow = {
         ctx.session.flow = 'exchange';
         ctx.session.step = 'action';
         ctx.session.tasa = await getBTC();
+        ctx.session.bill = 'zinli';
         if (!ctx.session.tasa || isNaN(ctx.session.tasa)) {
             ctx.reply("❌ Error obteniendo la tasa del dólar. Intenta de nuevo en unos segundos, si no deseas esperar guarda nuestro contacto y realiza la operacion mediante nuestro whatsapp +584121283027");
             ctx.session.flow = null;
