@@ -81,7 +81,34 @@ const startCommand = async (ctx) => {
         ctx.reply('¡Hola! 👋 Soy tu asistente de exchange. Para comenzar, por favor, regístrate.', unegisteredKeyboard);
     }
 };
-const historyCommand = async (ctx) => { /* ... */ };
+const handleHistory = async (ctx) => {
+    const userId = ctx.from.id;
+    if (!(await findUserById(userId))) {
+        return ctx.reply('Debes registrarte para poder ver tu historial.');
+    }
+
+    const history = await getTransactionHistory(userId);
+
+    if (history.length === 0) {
+        return ctx.reply('📂 No tienes ninguna operación en tu historial todavía.');
+    }
+
+    let message = '📜 **Tu Historial de Operaciones Recientes:**\n\n';
+    history.forEach(tx => {
+        const date = new Date(tx.created_at).toLocaleString('es-ES');
+        const icon = tx.transaction_type === 'Comprar' ? '📈' : '📉';
+        message += `------------------------------------\n`;
+        message += `${icon} **Tipo:** ${tx.transaction_type}\n`;
+        message += `💰 **Monto:** $${tx.total_usd}\n`;
+        message += `🔵 **Estado:** ${tx.status}\n`;
+        message += `📅 **Fecha:** ${date}\n`;
+    });
+
+    // Usamos parse_mode 'Markdown' para que los asteriscos se conviertan en negrita.
+    ctx.replyWithHTML(message);
+};
+
+
 const helpCommand = (ctx) => ctx.reply('Usa los botones del menú para interactuar.');
 
 export function registerCommands(bot) {
