@@ -259,9 +259,9 @@ function calcularComision(amount, action) {
     // 🔵 Si compra → aplicar comisiones normales
     switch (true) {
         case (amount < 10):
-            return 1;
+            return 0.85;
         case (amount <= 25):
-            return 1.5;
+            return 1;
         default:
             return amount * 0.08;
     }
