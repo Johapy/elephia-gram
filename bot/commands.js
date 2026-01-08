@@ -117,8 +117,8 @@ export function registerCommands(bot) {
     bot.command('cancelbroadcast', cancelBroadcastCommand);
 
     bot.start(startCommand);
-    bot.command('historial', historyCommand);
-    bot.hears('📜 Mi Historial', historyCommand);
+    bot.command('historial', handleHistory);
+    bot.hears('📜 Mi Historial', handleHistory);
     bot.command('help', helpCommand);
     bot.hears('ℹ️ Ayuda', helpCommand);
 }
