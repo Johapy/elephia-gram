@@ -7,6 +7,8 @@ import { registerCommands, broadcastMessage } from './bot/commands.js';
 import registerFlow from './flows/register.js';
 import exchangeFlow from './flows/exchange.js';
 import paymentMethodsFlow from './flows/payment-methods.js';
+import { mainKeyboard } from './bot/keyboards.js';
+
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN_ID = parseInt(process.env.ADMIN_ID || '0');
