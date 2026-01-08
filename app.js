@@ -59,6 +59,40 @@ bot.on('photo', async (ctx) => {
 
 bot.on('text', (ctx) => {
     const text = ctx.message.text;
+    if (text === 'hola') {
+        ctx.reply(
+            `🌟 **Bienvenido a Mueve Exchange** 🌟\n\n` +
+            `¡Hola! Soy tu asistente para operaciones de cambio de divisas.\n\n` +
+            `📝 **Cómo usar el bot:**\n` +
+            `• Escribe **'exchange'** para iniciar una operación de cambio de bolívares\n` +
+            `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
+            `• Escribe **'help'** para obtener ayuda adicional\n\n` +
+            `` +
+            `Siguenos:\n` +
+            `- ❇️ Facebook: @MueveCA\n` +
+            `- ❇️ Instagram: @Mueve.app\n` +
+            `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
+            `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
+        );
+    } else {
+        if (!['👤 Registrarme', '💹 Realizar Cambio', 'ℹ️ Ayuda', '💳 Mis Métodos de Pago', '📜 Mi Historial'].includes(text)) {
+            ctx.reply(
+                `🌟 **Bienvenido a Mueve Exchange** 🌟\n\n` +
+                `¡Hola! Soy tu asistente para operaciones de cambio de divisas.\n\n` +
+                `📝 **Cómo usar el bot:**\n` +
+                `• Escribe **'exchange'** para iniciar una operación de cambio de bolívares\n` +
+                `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
+                `• Escribe **'help'** para obtener ayuda adicional\n\n` +
+                `` +
+                `Siguenos:\n` +
+                `- ❇️ Facebook: @MueveCA\n` +
+                `- ❇️ Instagram: @Mueve.app\n` +
+                `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
+                `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
+            );
+        }
+    }
+
     // Si el admin está en medio de un broadcast, no activamos otros flujos
     if (ctx.from.id === ADMIN_ID && ctx.session.broadcast_text && !text.startsWith('/')) {
         ctx.reply('Estoy esperando una imagen para tu broadcast. Si cambiaste de opinión, usa /cancelbroadcast.');
