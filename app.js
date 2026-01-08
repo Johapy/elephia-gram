@@ -14,7 +14,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN_ID = parseInt(process.env.ADMIN_ID || '0');
 
 bot.use(session({
-    defaultSession: () => ({ flow: null, step: null, broadcast_text: null }) // Añadimos broadcast_text a la sesión por defecto
+    defaultSession: () => ({ flow: null, step: null, broadcast_text: null })
 }));
 
 registerCommands(bot);
@@ -33,80 +33,68 @@ bot.hears('💳 Mis Métodos de Pago', async (ctx) => {
     paymentMethodsFlow.start(ctx);
 });
 
-// --- OYENTE DE FOTOS MODIFICADO ---
 bot.on('photo', async (ctx) => {
     const isAdmin = ctx.from.id === ADMIN_ID;
     const broadcastText = ctx.session.broadcast_text;
 
-    // Caso 1: Es el admin y tiene un mensaje de broadcast esperando en la sesión
     if (isAdmin && broadcastText) {
         const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-        
         ctx.reply('🚀 Iniciando el envío masivo de imagen y texto...');
         const { successCount, errorCount } = await broadcastMessage(ctx, broadcastText, photoId);
-        
-        ctx.session.broadcast_text = null; // Limpiamos la sesión
+        ctx.session.broadcast_text = null;
         ctx.reply(`✅ Envío completado.\n\nExitosos: ${successCount}\nErrores: ${errorCount}`);
-
-    // Caso 2: Es un comprobante de pago de un usuario normal
     } else if (ctx.session?.flow === 'exchange' && ctx.session?.step === 'payment') {
         exchangeFlow.handle(ctx);
-
-    // Caso 3: Es cualquier otra foto sin contexto
     } else {
         ctx.reply("🖼️ He recibido una imagen, pero no estoy seguro de qué hacer con ella en este momento.");
     }
 });
 
-
+// --- CORRECCIÓN EN EL MANEJADOR DE TEXTO ---
 bot.on('text', (ctx) => {
     const text = ctx.message.text;
-    if (text === 'hola') {
-        ctx.reply(
-            `🌟 **Bienvenido a Mueve Exchange** 🌟\n\n` +
-            `¡Hola! Soy tu asistente para operaciones de cambio de divisas.\n\n` +
-            `📝 **Cómo usar el bot:**\n` +
-            `• Escribe **'exchange'** para iniciar una operación de cambio de bolívares\n` +
-            `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
-            `• Escribe **'help'** para obtener ayuda adicional\n\n` +
-            `` +
-            `Siguenos:\n` +
-            `- ❇️ Facebook: @MueveCA\n` +
-            `- ❇️ Instagram: @Mueve.app\n` +
-            `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
-            `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
-        );
-    } else {
-        if (!['👤 Registrarme', '💹 Realizar Cambio', 'ℹ️ Ayuda', '💳 Mis Métodos de Pago', '📜 Mi Historial'].includes(text)) {
-            ctx.reply(
-                `🌟 **Bienvenido a Mueve Exchange** 🌟\n\n` +
-                `¡Hola! Soy tu asistente para operaciones de cambio de divisas.\n\n` +
-                `📝 **Cómo usar el bot:**\n` +
-                `• Escribe **'exchange'** para iniciar una operación de cambio de bolívares\n` +
-                `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
-                `• Escribe **'help'** para obtener ayuda adicional\n\n` +
-                `` +
-                `Siguenos:\n` +
-                `- ❇️ Facebook: @MueveCA\n` +
-                `- ❇️ Instagram: @Mueve.app\n` +
-                `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
-                `¡Estoy aquí para ayudarte con tus operaciones! 💱`, mainKeyboard
-            );
+
+    // 1. PRIORIDAD: Admin Broadcast
+    if (ctx.from.id === ADMIN_ID && ctx.session.broadcast_text && !text.startsWith('/')) {
+        ctx.reply('Estoy esperando una imagen para tu broadcast. Si cambiaste de opinión, usa /cancelbroadcast.');
+        return; // Salimos para no procesar más
+    }
+
+    // 2. PRIORIDAD: Flujos Activos (Lo más importante para tu problema)
+    if (ctx.session?.flow) {
+        if (ctx.session.flow === 'register') {
+            registerFlow.handle(ctx);
+            return; // ¡Importante! Salimos aquí para que no envíe el mensaje de bienvenida
+        } else if (ctx.session.flow === 'exchange') {
+            exchangeFlow.handle(ctx);
+            return;
+        } else if (ctx.session.flow === 'payment_methods') {
+            paymentMethodsFlow.handle(ctx);
+            return;
         }
     }
 
-    // Si el admin está en medio de un broadcast, no activamos otros flujos
-    if (ctx.from.id === ADMIN_ID && ctx.session.broadcast_text && !text.startsWith('/')) {
-        ctx.reply('Estoy esperando una imagen para tu broadcast. Si cambiaste de opinión, usa /cancelbroadcast.');
-        return;
-    }
+    // 3. PRIORIDAD: Mensajes Generales (Solo si no hay flujo activo)
+    // Definimos el mensaje de bienvenida reutilizable
+    const welcomeMsg = `🌟 **Bienvenido a Mueve Exchange** 🌟\n\n` +
+        `¡Hola! Soy tu asistente para operaciones de cambio de divisas.\n\n` +
+        `📝 **Cómo usar el bot:**\n` +
+        `• Escribe **'exchange'** para iniciar una operación de cambio de bolívares\n` +
+        `• Escribe **'historial'** para consultar tu historial de transacciones\n` +
+        `• Escribe **'help'** para obtener ayuda adicional\n\n` +
+        `Siguenos:\n` +
+        `- ❇️ Facebook: @MueveCA\n` +
+        `- ❇️ Instagram: @Mueve.app\n` +
+        `- 📞 Whatsapp (Soporte): 0412-1283027\n` +
+        `¡Estoy aquí para ayudarte con tus operaciones! 💱`;
 
-    if (ctx.session?.flow === 'register') {
-        registerFlow.handle(ctx);
-    } else if (ctx.session?.flow === 'exchange') {
-        exchangeFlow.handle(ctx);
-    } else if (ctx.session?.flow === 'payment_methods') {
-        paymentMethodsFlow.handle(ctx);
+    if (text.toLowerCase() === 'hola') {
+        ctx.reply(welcomeMsg, mainKeyboard);
+    } else {
+        // Verificamos que no sea un botón del menú principal antes de enviar el mensaje de ayuda
+        if (!['👤 Registrarme', '💹 Realizar Cambio', 'ℹ️ Ayuda', '💳 Mis Métodos de Pago', '📜 Mi Historial'].includes(text)) {
+            ctx.reply(welcomeMsg, mainKeyboard);
+        }
     }
 });
 
